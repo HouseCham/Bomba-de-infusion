@@ -8,13 +8,18 @@ const int pin_d5 = 5;
 const int pin_d6 = 6; 
 const int pin_d7 = 7;
 
+// Valores bomba
+const int delayMin = 38461;
+const int delayMax = 2400;
+const int pasosPorVuelta = 780;
+
 // Stepper
 #define dirPin 2
 #define stepPin 3
 #define stepsPerRevolution 200
 
 //Parametros
-int flujo = 10;
+int flujo = 1;
 int vueltas = 0;
 
 const int pin_BL = 10; 
@@ -48,33 +53,39 @@ void loop() {
   }
   
   if (x < 200) {
-    flujo++;
-    delay(200);
+    if(flujo < 16){
+      flujo++;
+      delay(200); 
+    }
   }
   else if (x < 400){
-    flujo--;
-    delay(200);
+    if(flujo > 1){
+      flujo--;
+      delay(200); 
+    }
   }
   else if (x < 600){
     restart();
   }
   else if (x < 800){
-    bomba();
+    bomba(flujo);
   }
 }
 
-void bomba(){
+void bomba(int flujo){
+  int pasosCount = pasosPorVuelta * flujo;
+  int delayBomba = (delayMin * pasosPorVuelta)/ pasosCount;
+  
   // Set the spinning direction clockwise:
   digitalWrite(dirPin, HIGH);
   bool flag = true;
-  int count = 0;
   while(flag){
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(1000);
+    delayMicroseconds(37974);
     digitalWrite(stepPin, LOW);
-    delayMicroseconds(1000);
-    count++;
-    if(count > 800){
+    delayMicroseconds(37974);
+    pasosCount--;
+    if(pasosCount < 0){
       flag = false;
     }
   }
