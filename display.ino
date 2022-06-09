@@ -66,27 +66,34 @@ void loop() {
 void bomba(){
   // Set the spinning direction clockwise:
   digitalWrite(dirPin, HIGH);
-  int flag = 10;
-  
-  while ( flag > 0){
+  bool flag = true;
+  int count = 0;
+  while(flag){
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(1000);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(1000);
-    flag--;
+    count++;
+    if(count > 800){
+      flag = false;
+    }
   }
 }
 
 void restart(){
   // Set the spinning direction clockwise:
   digitalWrite(dirPin, LOW);
-  int flag = 10;
+  bool flag = true;
+  int count = 0;
   
-  while ( flag > 0){
+  while(flag){
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(1000);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(1000);
-    flag--;
+    count++;
+    if(count > 800){
+      flag = false;
+    }
   }
 }
