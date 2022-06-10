@@ -1,4 +1,7 @@
+#include <AccelStepper.h>
 #include <LiquidCrystal.h>
+
+AccelStepper stepper = AccelStepper(1, 3, 2);
 
 // LCD pin to Arduino
 const int pin_RS = 8; 
@@ -11,11 +14,8 @@ const int pin_d7 = 7;
 // Valores bomba
 const int delayMin = 38461;
 const int delayMax = 2400;
-const int pasosPorVuelta = 780;
+int pasosPorVuelta;
 
-// Stepper
-#define dirPin 2
-#define stepPin 3
 #define stepsPerRevolution 200
 
 //Parametros
@@ -36,9 +36,7 @@ void setup() {
   lcd.setCursor(10,1);
   lcd.print("ml/min");
 
-  /* ========== Stepper ========== */
-  pinMode(stepPin, OUTPUT);
-  pinMode(dirPin, OUTPUT);
+  stepper.setMaxSpeed(208);
 }
 
 void loop() {
@@ -73,38 +71,44 @@ void loop() {
 }
 
 void bomba(int flujo){
-  int pasosCount = pasosPorVuelta * flujo;
-  int delayBomba = (delayMin * pasosPorVuelta)/ pasosCount;
+  stepper.setCurrentPosition(0);
+
+  switch(flujo){
+    case 1:
+      pasosPorVuelta = 845;
+      break;
+    case 2:
+      pasosPorVuelta = 820;
+      break;
+    case 3:
+      pasosPorVuelta = 825;
+      break;
+    case 4:
+      pasosPorVuelta = 815;
+      break;
+    case 8:
+      pasosPorVuelta = 790;
+      break;
+     default:
+      pasosPorVuelta = 800;
+      break;
+  }
   
-  // Set the spinning direction clockwise:
-  digitalWrite(dirPin, HIGH);
-  bool flag = true;
-  while(flag){
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(37974);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(37974);
-    pasosCount--;
-    if(pasosCount < 0){
-      flag = false;
-    }
+  int pasosCount = pasosPorVuelta * flujo;
+
+  while(stepper.currentPosition() != pasosCount) 
+  {
+    stepper.setSpeed(pasosCount/60);
+    stepper.runSpeed();
   }
 }
 
 void restart(){
-  // Set the spinning direction clockwise:
-  digitalWrite(dirPin, LOW);
-  bool flag = true;
-  int count = 0;
+  stepper.setCurrentPosition(0);
   
-  while(flag){
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(1000);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(1000);
-    count++;
-    if(count > 800){
-      flag = false;
-    }
+  while(stepper.currentPosition() != -200) 
+  {
+    stepper.setSpeed(-600);
+    stepper.runSpeed();
   }
 }
